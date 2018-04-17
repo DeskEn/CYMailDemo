@@ -45,9 +45,6 @@
 #pragma mark - Life cycle
 - (void)viewDidLoad {
     [super viewDidLoad];
-    self.usernameTextField.text = @"zhiyong.cao@ucarinc.com";
-    self.passwordTextField.text = @"Caozhiyong1983";
-    self.nicknameTextField.text = @"优车1";
     
     self.loginButton.enabled = YES;
 }
