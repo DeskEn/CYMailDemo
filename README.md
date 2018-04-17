@@ -5,3 +5,10 @@ As the size of mailcore2 is over 100Mb, please install the frameworks by cocoapo
 pod install
 ```
 If this helps you, a star will encourage me a lot. :)
+
+
+感谢 CYMailDemo 的贡献。因为他的这个demo已经一年没有更新，所以我建立了一个fork进行修改。
+
+修改了一些demo中的bug，目前网易和qq的邮箱可以运行。网易因为没有申请证书，所以不能收邮件。qq的邮箱在检测状态的时候还有点问题，需要在列表页屏蔽一下代码。后续改进。神州的邮箱已经没有问题。
+
+目前网上没有成型的邮箱demo，希望对大家有帮助。
