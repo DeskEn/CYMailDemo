@@ -49,6 +49,7 @@ static NSString *kMailDetailCellId = @"MailContactCell";
 #pragma mark - Life Cycle
 - (void)viewDidLoad{
     [super viewDidLoad];
+    self.webViewHeight = 300.0f;
     [self configureSubview];
     [self loadContent];
 }
@@ -79,6 +80,7 @@ static NSString *kMailDetailCellId = @"MailContactCell";
 }
 
 - (void)loadContent{
+    //数据保存有问题，暂时关掉
     if ([NSString isBlankString:self.mail.content]) {
         [self showHudWithMsg:MsgLoading];
         __weak typeof(self) weakSelf = self;
@@ -89,6 +91,9 @@ static NSString *kMailDetailCellId = @"MailContactCell";
             [weakSelf hideHuds];
             [weakSelf showToast:@"获取正文失败"];
         }];
+    }
+    else{
+        [self.mailDetailWebView loadHTMLString:self.mail.content baseURL:nil];
     }
 }
 
@@ -204,7 +209,7 @@ static NSString *kMailDetailCellId = @"MailContactCell";
 
 - (NSString *)htmlAdjustWithPageWidth:(CGFloat )pageWidth html:(NSString *)html webView:(UIWebView *)webView {
     NSMutableString *str = [NSMutableString stringWithString:html];
-    self.webViewScale = webView.frame.size.width/pageWidth;
+    self.webViewScale = ([UIScreen mainScreen].bounds.size.width - 2*16)/pageWidth;
     NSString *stringForReplace = [NSString stringWithFormat:@"<meta name=\"viewport\" content=\" initial-scale=%f, minimum-scale=0.1, maximum-scale=2.0, user-scalable=yes\"></head>",self.webViewScale];
     
     NSRange range = NSMakeRange(0, str.length);
@@ -351,9 +356,6 @@ static NSString *kMailDetailCellId = @"MailContactCell";
         _mailDetailWebView.scalesPageToFit = NO;
         _mailDetailWebView.opaque = NO;
         _mailDetailWebView.backgroundColor = [UIColor clearColor];
-        if (![NSString isBlankString:self.mail.content]) {
-            [_mailDetailWebView loadHTMLString:self.mail.content baseURL:nil];
-        }
     }
     return _mailDetailWebView;
 }

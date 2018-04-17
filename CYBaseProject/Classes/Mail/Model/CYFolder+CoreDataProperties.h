@@ -21,7 +21,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nullable, nonatomic, copy) NSString *name;
 @property (nullable, nonatomic, copy) NSNumber *nextUid;
 @property (nullable, nonatomic, copy) NSString *path;
-@property (nullable, nonatomic, copy) NSNumber *recentCount;
+@property (nullable, nonatomic, copy) NSNumber *recentCount;//未下载邮件数量
 @property (nullable, nonatomic, copy) NSNumber *unseenCount;
 @property (nullable, nonatomic, retain) CYMailAccount *account;
 

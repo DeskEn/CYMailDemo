@@ -41,6 +41,7 @@ static NSString *const demoCellReuseIdentifier = @"MailListCell";
 - (void)viewWillAppear:(BOOL)animated{
     [super viewWillAppear:YES];
     [self loadMailList];
+    [self updateMailList];
 }
 
 #pragma mark - InitSubviews
@@ -137,6 +138,13 @@ static NSString *const demoCellReuseIdentifier = @"MailListCell";
         [self.tableView reloadData];
     }
     
+}
+
+- (void)updateMailList{
+    //拉取策略，暂时没想到更好的策略
+    if([self.folder.recentCount integerValue] > 0){
+        [self queryMailWithRefreshType:MailListRefreshTypeHeader];
+    }
 }
 
 #pragma mark - Network Methods

@@ -86,6 +86,9 @@ static NSString * const demoCellReuseIdentifier = @"MyToolsCellReuseIdentifier";
     if ([folder.unseenCount integerValue]!=0) {
         cell.detailTextLabel.text = [NSString stringWithFormat:@"%@",folder.unseenCount];
     }
+    else{
+        cell.detailTextLabel.text = @"";
+    }
     
     return cell;
 }
@@ -160,6 +163,11 @@ static NSString * const demoCellReuseIdentifier = @"MyToolsCellReuseIdentifier";
         }
         if ([weakFolder.firstUid integerValue] == 0) {
             weakFolder.firstUid = @(status.uidNext);
+        }
+        
+        //加入更新逻辑
+        if([weakFolder.nextUid integerValue] < status.uidNext){
+            weakFolder.recentCount = [NSNumber numberWithInteger:(status.uidNext-([weakFolder.nextUid integerValue] < status.uidNext))];
         }
         [[CYMailModelManager sharedCYMailModelManager]save:nil];
         [weakSelf.tableView reloadData];

@@ -2,24 +2,24 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>189</key>
+	<key>ucarinc</key>
 	<dict>
 		<key>smtpAuthType</key>
-		<integer>0</integer>
+		<integer>16</integer>
 		<key>fetchMailHost</key>
-		<string>imap.189.cn</string>
+		<string>imap.ucarinc.com</string>
 		<key>fetchMailPort</key>
-		<integer>143</integer>
+		<integer>993</integer>
 		<key>sendMailHost</key>
-		<string>smtp.189.cn</string>
+		<string>smtp.ucarinc.com</string>
 		<key>sendMailPort</key>
-		<integer>25</integer>
+		<integer>587</integer>
 		<key>mailStoreProtocol</key>
 		<string>imap</string>
 		<key>serverName</key>
-		<string>189.cn</string>
+		<string>mail.ucarinc.com</string>
 		<key>ssl</key>
-		<false/>
+		<true/>
 	</dict>
 	<key>sina</key>
 	<dict>

@@ -47,11 +47,11 @@
 + (BOOL)isTrashFolder:(CYFolder *)folder{
     
     //According to flag
-    BOOL flagJudgement =[folder.flags integerValue] & MCOIMAPFolderFlagTrash;
+    BOOL flagJudgement = ![folder.flags integerValue];//[folder.flags integerValue] & MCOIMAPFolderFlagTrash;
     //According to name
-    BOOL nameJudgement = [folder.name isEqualToString:@"已删除"]||[[folder.name uppercaseString] isEqualToString:@"TRASH"]||[[folder.name uppercaseString] isEqualToString:@"JUNK"];
+    BOOL nameJudgement = [folder.name isEqualToString:@"已删除邮件"]||[[folder.name uppercaseString] isEqualToString:@"TRASH"]||[[folder.name uppercaseString] isEqualToString:@"JUNK"]||[folder.name isEqualToString:@"已删除"];
     
-    return flagJudgement||nameJudgement;
+    return flagJudgement&&nameJudgement;
 }
 
 /**
@@ -65,7 +65,7 @@
     //According to flag
     BOOL flagJudgement =[folder.flags integerValue] & MCOIMAPFolderFlagSentMail;
     //According to name
-    BOOL nameJudgement = [folder.name isEqualToString:@"已发送"]||[[folder.name uppercaseString] isEqualToString:@"SENT"];
+    BOOL nameJudgement = [folder.name isEqualToString:@"已发送"]||[[folder.name uppercaseString] isEqualToString:@"SENT"]||[folder.name isEqualToString:@"已发送邮件"];
     
     return flagJudgement||nameJudgement;
 }

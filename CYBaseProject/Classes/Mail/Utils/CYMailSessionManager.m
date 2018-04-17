@@ -32,13 +32,14 @@ SingletonM(CYMailSessionManager)
     CYMailSession *session = [[CYMailSession alloc]init];
     session.username = account.username;
     session.password = account.password;
-    session.password = account.password;
     session.imapHostname = account.fetchHost;
     session.imapPort = [account.fetchPort unsignedIntegerValue];
     session.smtpHostname = account.sendHost;
     session.smtpPort = [account.sendPort unsignedIntegerValue];
     session.nickname = account.nickName;
     session.smtpAuthType = [account.smtpAuthType integerValue];
+    
+//    session.imapConnectionType = CYMailConnectionTypeTLS;
     if (account.ssl) {
         session.imapConnectionType = CYMailConnectionTypeTLS;
     }else{

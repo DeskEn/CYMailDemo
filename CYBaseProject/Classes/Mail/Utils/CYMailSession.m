@@ -26,6 +26,7 @@
 - (MCOIMAPSession *)imapSession{
     if (!_imapSession) {
         _imapSession = [[MCOIMAPSession alloc] init];
+        [_imapSession setCheckCertificateEnabled:NO];
     }
     return _imapSession;
 }
@@ -33,7 +34,9 @@
 - (MCOSMTPSession *)smtpSession{
     if (!_smtpSession) {
         _smtpSession = [[MCOSMTPSession alloc] init];
-        _smtpSession.connectionType = MCOConnectionTypeClear;
+        [_smtpSession setCheckCertificateEnabled:NO];
+        [_smtpSession setConnectionType:MCOConnectionTypeStartTLS];
+
     }
     return _smtpSession;
 }
@@ -92,6 +95,8 @@
  */
 - (void)checkAccountSuccess:(void (^)())success failure:(void (^)(NSError *  error))failure{
     MCOIMAPOperation *operation = [self.imapSession checkAccountOperation];
+    
+    
     [operation start:^(NSError * _Nullable error) {
         if (error){
             NSLog(@"Fail to verify =====> %@",error);
@@ -118,6 +123,8 @@
     
     __weak typeof(self) weakSelf = self;
     MCOIMAPFetchFoldersOperation *operation = [self.imapSession fetchAllFoldersOperation];
+    
+    
     [operation start:^(NSError * _Nullable error, NSArray * _Nullable folders) {
         if (error){
             NSLog(@"Fail to get folder list =====> %@",error);
@@ -151,6 +158,7 @@
 - (void)folderStatusOfFolder:(NSString *)folder success:(void (^)(MCOIMAPFolderStatus *status))success failure:(void (^)(NSError *  error))failure{
     
     MCOIMAPFolderStatusOperation *folderStatus = [self.imapSession folderStatusOperation:folder];
+    
     [folderStatus start:^(NSError * _Nullable error, MCOIMAPFolderStatus * _Nullable status) {
         if (error){
             NSLog(@"Fail to get %@ status =====> %@",folder,error);
@@ -180,8 +188,9 @@
     MCOIMAPMessagesRequestKind requestKind = (MCOIMAPMessagesRequestKind)
     
     (MCOIMAPMessagesRequestKindStructure |MCOIMAPMessagesRequestKindInternalDate |MCOIMAPMessagesRequestKindHeaderSubject |MCOIMAPMessagesRequestKindFlags |MCOIMAPMessagesRequestKindFullHeaders);
+
     
-    MCOIndexSet *uids = [MCOIndexSet indexSetWithRange:MCORangeMake(3000,length)];
+    MCOIndexSet *uids = [MCOIndexSet indexSetWithRange:MCORangeMake(startUid,length)];
     
     MCOIMAPFetchMessagesOperation *fetchOperation = [self.imapSession fetchMessagesOperationWithFolder:folder.path requestKind:requestKind uids:uids];
     
@@ -544,6 +553,8 @@
     
     void (^sendBlock)(NSData *) = ^(NSData *data){
         MCOSMTPSendOperation *sendOperation = [self.smtpSession sendOperationWithData:data];
+//        self.smtpSession.connectionType = MCOConnectionTypeStartTLS;
+//        self.smtpSession.authType = MCOAuthTypeSASLLogin;
         [sendOperation start:^(NSError *error) {
             if(error) {
                 NSLog(@"Fail to send mail=====》%@",error);
@@ -552,7 +563,7 @@
                 NSLog(@"Success to send mail");
                 //make a copy to sent folder
                 if (![NSString isBlankString:sentFolder.path]) {
-                    MCOIMAPAppendMessageOperation *op = [self.imapSession appendMessageOperationWithFolder:sentFolder.path messageData:data flags:MCOMessageFlagNone];
+                    MCOIMAPAppendMessageOperation *op = [self.imapSession appendMessageOperationWithFolder:sentFolder.path messageData:data flags:MCOMessageFlagSeen];
                     [op start:^(NSError *error, uint32_t createdUID) {}];
                 }
                 success();
