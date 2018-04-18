@@ -18,8 +18,41 @@
 #import "CYMailModelManager.h"
 #import "CYMailSessionManager.h"
 #import "CYMailUtil.h"
+#import <MailCore/MailCore.h>
+
 
 static NSString *kMailDetailCellId = @"MailContactCell";
+
+static NSString * mainJavascript = @"\
+var imageElements = function() {\
+    var imageNodes = document.getElementsByTagName('img');\
+    return [].slice.call(imageNodes);\
+};\
+\
+var findCIDImageURL = function() {\
+    var images = imageElements();\
+    \
+    var imgLinks = [];\
+    for (var i = 0; i < images.length; i++) {\
+        var url = images[i].getAttribute('src');\
+        if (url.indexOf('cid:') == 0 || url.indexOf('x-mailcore-image:') == 0)\
+            imgLinks.push(url);\
+    }\
+    return JSON.stringify(imgLinks);\
+};\
+\
+var replaceImageSrc = function(info) {\
+    var images = imageElements();\
+    \
+    for (var i = 0; i < images.length; i++) {\
+        var url = images[i].getAttribute('src');\
+        if (url.indexOf(info.URLKey) == 0) {\
+            images[i].setAttribute('src', info.LocalPathKey);\
+            break;\
+        }\
+    }\
+};\
+";
 
 @interface MailDetailViewController ()<UIWebViewDelegate,UITableViewDelegate,UITableViewDataSource>
 
@@ -80,7 +113,7 @@ static NSString *kMailDetailCellId = @"MailContactCell";
 }
 
 - (void)loadContent{
-    //数据保存有问题，暂时关掉
+    
     if ([NSString isBlankString:self.mail.content]) {
         [self showHudWithMsg:MsgLoading];
         __weak typeof(self) weakSelf = self;
@@ -200,10 +233,14 @@ static NSString *kMailDetailCellId = @"MailContactCell";
 }
 
 - (BOOL)webView:(UIWebView*)webView shouldStartLoadWithRequest:(NSURLRequest*)request navigationType:(UIWebViewNavigationType)navigationType {
-    if(navigationType==UIWebViewNavigationTypeLinkClicked){
-        return NO;
-    }else{
+
+    NSURLRequest *responseRequest = [self webView:self.mailDetailWebView resource:nil willSendRequest:request redirectResponse:nil fromDataSource:nil];
+    
+    if(responseRequest == request) {
         return YES;
+    } else {
+        [webView loadRequest:responseRequest];
+        return NO;
     }
 }
 
@@ -215,8 +252,101 @@ static NSString *kMailDetailCellId = @"MailContactCell";
     NSRange range = NSMakeRange(0, str.length);
     [str replaceOccurrencesOfString:@"</head>" withString:stringForReplace options:NSLiteralSearch range:range];
     
+    NSString *stringForReplacebody = [NSString stringWithFormat:@"<script>%@</script></body><iframe src='x-mailcore-msgviewloaded:' style='width: 0px; height: 0px; border: none;'>"
+                                  @"</iframe>", mainJavascript];
+    
+    NSRange range1 = NSMakeRange(0, str.length);
+    [str replaceOccurrencesOfString:@"</body>" withString:stringForReplacebody options:NSLiteralSearch range:range1];
+    
     return str;
 }
+
+- (NSURLRequest *)webView:(UIWebView *)sender resource:(id)identifier willSendRequest:(NSURLRequest *)request redirectResponse:(NSURLResponse *)redirectResponse fromDataSource:(id)dataSource {
+    
+    if ([[[request URL] scheme] isEqualToString:@"x-mailcore-msgviewloaded"]) {
+        [self _loadImages];
+    }
+    return request;
+}
+
+// 加载网页中的图片
+- (void) _loadImages {
+    NSString * result = [self.mailDetailWebView stringByEvaluatingJavaScriptFromString:@"findCIDImageURL()"];
+    NSLog(@"-----加载网页中的图片-----");
+    NSLog(@"%@", result);
+    
+    if (result == nil || [result isEqualToString:@""]) {
+        return;
+    }
+    
+    NSData * data = [result dataUsingEncoding:NSUTF8StringEncoding];
+    NSError *error = nil;
+    NSArray * imagesURLStrings = [NSJSONSerialization JSONObjectWithData:data options:0 error:&error];
+    
+    for (NSString * urlString in imagesURLStrings) {
+
+//        if ([MCOCIDURLProtocol isCID:url]) {
+//            part = [self _partForCIDURL:url];
+//        }
+//        else if ([MCOCIDURLProtocol isXMailcoreImage:url]) {
+//            NSString * specifier = [url resourceSpecifier];
+//            NSString * partUniqueID = specifier;
+//            part = [self _partForUniqueID:partUniqueID];
+//        }
+
+//        if (part == nil) {
+//            continue;
+//        }
+//
+//        NSString * partUniqueID = [part uniqueID];
+//        MCOAttachment * attachment = (MCOAttachment *) [msgPaser partForUniqueID:partUniqueID];
+//        NSData * data =[attachment data];
+//
+//        if (data!=nil) {
+//
+//            //获取文件路径
+//            NSString *tmpDirectory =NSTemporaryDirectory();
+//            NSString *filePath=[tmpDirectory stringByAppendingPathComponent : attachment.filename ];
+//
+//            NSFileManager *fileManger=[NSFileManager defaultManager];
+//            if (![fileManger fileExistsAtPath:filePath]) {
+//                //不存在就去请求加载
+//                NSData *attachmentData=[attachment data];
+//                [attachmentData writeToFile:filePath atomically:YES];
+//                NSLog(@"资源：%@已经下载至%@", attachment.filename,filePath);
+//            }
+//
+//            NSURL * cacheURL = [NSURL fileURLWithPath:filePath];
+//            NSDictionary * args =@{@"URLKey": urlString,@"LocalPathKey": cacheURL.absoluteString};
+//
+//            NSString * jsonString = [self _jsonEscapedStringFromDictionary:args];
+//            NSString * replaceScript = [NSString stringWithFormat:@"replaceImageSrc(%@)", jsonString];
+//            [self.mailDetailWebView stringByEvaluatingJavaScriptFromString:replaceScript];
+//        }
+    }
+}
+
+- (NSString *)_jsonEscapedStringFromDictionary:(NSDictionary *)dictionary {
+    
+    NSData * json = [NSJSONSerialization dataWithJSONObject:dictionary options:0 error:nil];
+    NSString * jsonString = [[NSString alloc] initWithData:json encoding:NSUTF8StringEncoding];
+    return jsonString;
+}
+
+- (NSURL *) _cacheJPEGImageData:(NSData *)imageData withFilename:(NSString *)filename {
+    
+    NSString * path = [[NSTemporaryDirectory()stringByAppendingPathComponent:filename]stringByAppendingPathExtension:@"jpg"];
+    [imageData writeToFile:path atomically:YES];
+    return [NSURL fileURLWithPath:path];
+}
+
+//- (MCOAbstractPart *) _partForCIDURL:(NSURL *)url {
+//    return [_messageParser partForContentID:[url resourceSpecifier]];
+//}
+//
+//- (MCOAbstractPart *) _partForUniqueID:(NSString *)partUniqueID {
+//    return [_messageParser partForUniqueID:partUniqueID];
+//}
 
 #pragma mark - Mail method
 - (void)pushReply{
