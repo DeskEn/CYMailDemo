@@ -148,7 +148,9 @@ typedef NS_OPTIONS(NSInteger, CYMailConnectionType) {
  */
 - (void)sendMailWithSubject:(NSString *)subject content:(NSString *)content toArray:(NSArray *)toArray ccArray:(NSArray *)ccArray bccArray:(NSArray *)bccArray attachmentArray:(NSArray<CYTempAttachment *> *)attachments originMail:(CYMail *)originMail success:(void (^)())success failure:(void (^)(NSError *  error))failure progress:(void (^)(NSInteger current, NSInteger maximum))progress;
 
+/**
+ *获取邮件的message
+ */
 -(void)fetchMsgWithMail:(CYMail *)mail completionBlock:(void (^)(NSError * __nullable error, MCOAbstractMessage * __nullable data))completionBlock;
 
--(void)loadimg:(MCOIMAPMessage *)message part:(MCOIMAPPart *)part mail:(CYMail *)mail;
 @end

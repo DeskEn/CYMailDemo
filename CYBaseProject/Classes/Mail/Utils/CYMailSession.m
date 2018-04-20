@@ -616,14 +616,5 @@
     }];
 }
 
--(void)loadimg:(MCOIMAPMessage *)message part:(MCOIMAPPart *)part mail:(CYMail *)mail{
-    MCOIMAPFetchContentOperation * op = [self.imapSession fetchMessageAttachmentOperationWithFolder:mail.folderPath uid:[mail.uid integerValue] partID:[(MCOIMAPPart *)part partID] encoding:[part encoding]];
-    [op start:^(NSError * error, NSData * data) {
-        if ([error code] != MCOErrorNone) {
-            
-            return;
-        }
-    }];
-}
 
 @end
