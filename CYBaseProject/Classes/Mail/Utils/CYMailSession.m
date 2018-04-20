@@ -602,4 +602,28 @@
     }
 }
 
+-(void)fetchMsgWithMail:(CYMail *)mail completionBlock:(void (^)(NSError * __nullable error, MCOAbstractMessage * __nullable data))completionBlock{
+    MCOIMAPFetchContentOperation * op = [self.imapSession fetchMessageOperationWithFolder:mail.folderPath uid:[mail.uid unsignedIntValue]];
+    [op start:^(NSError * error, NSData * data) {
+        if ([error code] != MCOErrorNone) {
+            return;
+        }
+        
+        NSAssert(data != nil, @"data != nil");
+        
+        MCOMessageParser * msg = [MCOMessageParser messageParserWithData:data];
+        completionBlock(error, (MCOAbstractMessage *)msg);
+    }];
+}
+
+-(void)loadimg:(MCOIMAPMessage *)message part:(MCOIMAPPart *)part mail:(CYMail *)mail{
+    MCOIMAPFetchContentOperation * op = [self.imapSession fetchMessageAttachmentOperationWithFolder:mail.folderPath uid:[mail.uid integerValue] partID:[(MCOIMAPPart *)part partID] encoding:[part encoding]];
+    [op start:^(NSError * error, NSData * data) {
+        if ([error code] != MCOErrorNone) {
+            
+            return;
+        }
+    }];
+}
+
 @end

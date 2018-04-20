@@ -19,6 +19,7 @@
 #import "CYMailSessionManager.h"
 #import "CYMailUtil.h"
 #import <MailCore/MailCore.h>
+#import "MCOCIDURLProtocol.h"
 
 
 static NSString *kMailDetailCellId = @"MailContactCell";
@@ -74,6 +75,7 @@ var replaceImageSrc = function(info) {\
 
 @property (nonatomic, strong) MailDetailBottomView *bottomView;
 @property (nonatomic, strong) UITableView *tableView;
+@property (nonatomic, strong) MCOIMAPMessage *message;
 
 @end
 
@@ -85,6 +87,12 @@ var replaceImageSrc = function(info) {\
     self.webViewHeight = 300.0f;
     [self configureSubview];
     [self loadContent];
+    
+    __weak typeof(self) weakself = self;
+    [self.session fetchMsgWithMail:self.mail completionBlock:^(NSError * _Nullable error, MCOAbstractMessage * _Nullable data) {
+        weakself.message = (MCOIMAPMessage *)data;
+    }];
+    
 }
 
 - (void)viewDidAppear:(BOOL)animated{
@@ -126,6 +134,7 @@ var replaceImageSrc = function(info) {\
         }];
     }
     else{
+        NSLog(@"self.mail.content: %@", self.mail.content);
         [self.mailDetailWebView loadHTMLString:self.mail.content baseURL:nil];
     }
 }
@@ -272,58 +281,44 @@ var replaceImageSrc = function(info) {\
 // 加载网页中的图片
 - (void) _loadImages {
     NSString * result = [self.mailDetailWebView stringByEvaluatingJavaScriptFromString:@"findCIDImageURL()"];
-    NSLog(@"-----加载网页中的图片-----");
+    NSLog(@"----------");
     NSLog(@"%@", result);
-    
-    if (result == nil || [result isEqualToString:@""]) {
-        return;
-    }
-    
     NSData * data = [result dataUsingEncoding:NSUTF8StringEncoding];
     NSError *error = nil;
     NSArray * imagesURLStrings = [NSJSONSerialization JSONObjectWithData:data options:0 error:&error];
     
-    for (NSString * urlString in imagesURLStrings) {
-
-//        if ([MCOCIDURLProtocol isCID:url]) {
-//            part = [self _partForCIDURL:url];
-//        }
-//        else if ([MCOCIDURLProtocol isXMailcoreImage:url]) {
-//            NSString * specifier = [url resourceSpecifier];
-//            NSString * partUniqueID = specifier;
-//            part = [self _partForUniqueID:partUniqueID];
-//        }
-
-//        if (part == nil) {
-//            continue;
-//        }
-//
-//        NSString * partUniqueID = [part uniqueID];
-//        MCOAttachment * attachment = (MCOAttachment *) [msgPaser partForUniqueID:partUniqueID];
-//        NSData * data =[attachment data];
-//
-//        if (data!=nil) {
-//
-//            //获取文件路径
-//            NSString *tmpDirectory =NSTemporaryDirectory();
-//            NSString *filePath=[tmpDirectory stringByAppendingPathComponent : attachment.filename ];
-//
-//            NSFileManager *fileManger=[NSFileManager defaultManager];
-//            if (![fileManger fileExistsAtPath:filePath]) {
-//                //不存在就去请求加载
-//                NSData *attachmentData=[attachment data];
-//                [attachmentData writeToFile:filePath atomically:YES];
-//                NSLog(@"资源：%@已经下载至%@", attachment.filename,filePath);
-//            }
-//
-//            NSURL * cacheURL = [NSURL fileURLWithPath:filePath];
-//            NSDictionary * args =@{@"URLKey": urlString,@"LocalPathKey": cacheURL.absoluteString};
-//
-//            NSString * jsonString = [self _jsonEscapedStringFromDictionary:args];
-//            NSString * replaceScript = [NSString stringWithFormat:@"replaceImageSrc(%@)", jsonString];
-//            [self.mailDetailWebView stringByEvaluatingJavaScriptFromString:replaceScript];
-//        }
-    }
+    for(NSString * urlString in imagesURLStrings) {
+        MCOAbstractPart * part = nil;
+        NSURL * url;
+        
+        url = [NSURL URLWithString:urlString];
+        if ([MCOCIDURLProtocol isCID:url]) {
+            part = [self _partForCIDURL:url];
+        }
+        else if ([MCOCIDURLProtocol isXMailcoreImage:url]) {
+            NSString * specifier = [url resourceSpecifier];
+            NSString * partUniqueID = specifier;
+            part = [self _partForUniqueID:partUniqueID];
+        }
+        
+        if (part == nil)
+            continue;
+        
+        NSString * partUniqueID = [part uniqueID];
+        MCOAttachment * attachment = (MCOAttachment *) [_message partForUniqueID:partUniqueID];
+        NSLog(@"%@", attachment.description);
+        
+        NSData *downloadedData = attachment.data;
+        
+        NSString * filename = [NSString stringWithFormat:@"%u", (unsigned int) downloadedData.hash];
+        NSURL * cacheURL = [self _cacheJPEGImageData:downloadedData withFilename:filename];
+        
+        NSDictionary * args = @{ @"URLKey": urlString, @"LocalPathKey": cacheURL.absoluteString };
+        NSString * jsonString = [self _jsonEscapedStringFromDictionary:args];
+        
+        NSString * replaceScript = [NSString stringWithFormat:@"replaceImageSrc(%@)", jsonString];
+        [self.mailDetailWebView stringByEvaluatingJavaScriptFromString:replaceScript];
+    };
 }
 
 - (NSString *)_jsonEscapedStringFromDictionary:(NSDictionary *)dictionary {
@@ -340,13 +335,16 @@ var replaceImageSrc = function(info) {\
     return [NSURL fileURLWithPath:path];
 }
 
-//- (MCOAbstractPart *) _partForCIDURL:(NSURL *)url {
-//    return [_messageParser partForContentID:[url resourceSpecifier]];
-//}
-//
-//- (MCOAbstractPart *) _partForUniqueID:(NSString *)partUniqueID {
-//    return [_messageParser partForUniqueID:partUniqueID];
-//}
+- (MCOAbstractPart *) _partForCIDURL:(NSURL *)url
+{
+    return [_message partForContentID:[url resourceSpecifier]];
+}
+
+- (MCOAbstractPart *) _partForUniqueID:(NSString *)partUniqueID
+{
+    return [_message partForUniqueID:partUniqueID];
+}
+
 
 #pragma mark - Mail method
 - (void)pushReply{

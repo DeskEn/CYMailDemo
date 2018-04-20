@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		19ED545A20887B9500480DC6 /* MCOCIDURLProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 19ED545920887B9500480DC6 /* MCOCIDURLProtocol.m */; };
 		3A9887CAFBF918B6FA48B474 /* libPods-CYMailDemo.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0DDAEEF9CD3CEC3A7B36AD11 /* libPods-CYMailDemo.a */; };
 		E10337C61E3785D3006C6BAD /* MailAttachmentCell.m in Sources */ = {isa = PBXBuildFile; fileRef = E10337BF1E3785D3006C6BAD /* MailAttachmentCell.m */; };
 		E10337C71E3785D3006C6BAD /* MailAttachmentCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = E10337C01E3785D3006C6BAD /* MailAttachmentCell.xib */; };
@@ -67,6 +68,8 @@
 
 /* Begin PBXFileReference section */
 		0DDAEEF9CD3CEC3A7B36AD11 /* libPods-CYMailDemo.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-CYMailDemo.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		19ED545820887B9500480DC6 /* MCOCIDURLProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MCOCIDURLProtocol.h; sourceTree = "<group>"; };
+		19ED545920887B9500480DC6 /* MCOCIDURLProtocol.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MCOCIDURLProtocol.m; sourceTree = "<group>"; };
 		62C0D81A1BC09E39E096D366 /* Pods-CYMailDemo.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CYMailDemo.debug.xcconfig"; path = "Pods/Target Support Files/Pods-CYMailDemo/Pods-CYMailDemo.debug.xcconfig"; sourceTree = "<group>"; };
 		E10337BE1E3785D3006C6BAD /* MailAttachmentCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MailAttachmentCell.h; sourceTree = "<group>"; };
 		E10337BF1E3785D3006C6BAD /* MailAttachmentCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MailAttachmentCell.m; sourceTree = "<group>"; };
@@ -184,6 +187,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		19ED545720887B9500480DC6 /* Protocol */ = {
+			isa = PBXGroup;
+			children = (
+				19ED545820887B9500480DC6 /* MCOCIDURLProtocol.h */,
+				19ED545920887B9500480DC6 /* MCOCIDURLProtocol.m */,
+			);
+			path = Protocol;
+			sourceTree = "<group>";
+		};
 		B776C4C27E2EF5FC1F70C81D /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -399,6 +411,7 @@
 		E1CC36F21D3E1589005FEA04 /* Mail */ = {
 			isa = PBXGroup;
 			children = (
+				19ED545720887B9500480DC6 /* Protocol */,
 				E1CC37DC1D3E16C0005FEA04 /* Utils */,
 				E1CC36F31D3E1589005FEA04 /* Controller */,
 				E1CC37241D3E1589005FEA04 /* Model */,
@@ -745,6 +758,7 @@
 				E1A16E2F1E27BA4A00C86832 /* CYMail.m in Sources */,
 				E1CC37931D3E1589005FEA04 /* MailHomeViewController.m in Sources */,
 				E1CC378B1D3E1589005FEA04 /* MailDetailViewController.m in Sources */,
+				19ED545A20887B9500480DC6 /* MCOCIDURLProtocol.m in Sources */,
 				E10337C61E3785D3006C6BAD /* MailAttachmentCell.m in Sources */,
 				E10A9A6A1E338E98003F45C0 /* MailDetailBottomView.m in Sources */,
 			);
