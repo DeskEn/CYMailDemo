@@ -86,13 +86,8 @@ var replaceImageSrc = function(info) {\
     [super viewDidLoad];
     self.webViewHeight = 300.0f;
     [self configureSubview];
+    [self loadmessage];
     [self loadContent];
-    
-    __weak typeof(self) weakself = self;
-    [self.session fetchMsgWithMail:self.mail completionBlock:^(NSError * _Nullable error, MCOAbstractMessage * _Nullable data) {
-        weakself.message = (MCOIMAPMessage *)data;
-    }];
-    
 }
 
 - (void)viewDidAppear:(BOOL)animated{
@@ -137,6 +132,14 @@ var replaceImageSrc = function(info) {\
         NSLog(@"self.mail.content: %@", self.mail.content);
         [self.mailDetailWebView loadHTMLString:self.mail.content baseURL:nil];
     }
+}
+
+-(void)loadmessage{
+    __weak typeof(self) weakself = self;
+    [self.session fetchMsgWithMail:self.mail completionBlock:^(NSError * _Nullable error, MCOAbstractMessage * _Nullable data) {
+        weakself.message = (MCOIMAPMessage *)data;
+        [weakself _loadImages];
+    }];
 }
 
 #pragma mark - DelegateMethod
