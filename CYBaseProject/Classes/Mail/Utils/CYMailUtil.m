@@ -47,9 +47,14 @@
 + (BOOL)isTrashFolder:(CYFolder *)folder{
     
     //According to flag
-    BOOL flagJudgement = ![folder.flags integerValue];//[folder.flags integerValue] & MCOIMAPFolderFlagTrash;
+    BOOL flagJudgement = [folder.flags integerValue] & MCOIMAPFolderFlagTrash;
+    
+    //兼容exchange
+    if([folder.flags integerValue] == 0)
+        flagJudgement = true;
+    
     //According to name
-    BOOL nameJudgement = [folder.name isEqualToString:@"已删除邮件"]||[[folder.name uppercaseString] isEqualToString:@"TRASH"]||[[folder.name uppercaseString] isEqualToString:@"JUNK"]||[folder.name isEqualToString:@"已删除"];
+    BOOL nameJudgement = [folder.name isEqualToString:@"已删除邮件"]||[[folder.name uppercaseString] isEqualToString:@"TRASH"]||[[folder.name uppercaseString] isEqualToString:@"JUNK"]||[folder.name isEqualToString:@"已删除"]||[[folder.name uppercaseString] isEqualToString:@"DELETED MESSAGES"];
     
     return flagJudgement&&nameJudgement;
 }
