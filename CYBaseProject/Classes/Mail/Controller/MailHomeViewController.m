@@ -99,6 +99,9 @@ static NSString * const demoCellReuseIdentifier = @"MyToolsCellReuseIdentifier";
 
     CYFolder *folder = self.mailFolderArray[indexPath.row];
     
+    //QQ邮箱访问其他文件夹会崩溃
+    if([folder.flags integerValue] == MCOIMAPFolderFlagNoSelect) return;
+    
     __weak typeof(self) weakSelf = self;
     void (^pushBlock)(CYFolder *) = ^(CYFolder *folder){
         MailListViewController *ctrl = [[MailListViewController alloc]init];
