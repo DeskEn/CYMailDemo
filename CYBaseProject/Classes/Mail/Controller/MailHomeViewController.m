@@ -151,6 +151,10 @@ static NSString * const demoCellReuseIdentifier = @"MyToolsCellReuseIdentifier";
 }
 
 - (void)queryMailFolderCount:(CYFolder *)folder hasMessage:(void (^)())hasMessage noMessage:(void (^)())noMessage{
+    
+    //QQ邮箱访问其他文件夹会崩溃
+    if([folder.flags integerValue] == MCOIMAPFolderFlagNoSelect) return;
+    
     CYMailSession *session = [[CYMailSessionManager sharedCYMailSessionManager]getSessionWithUsername:self.account.username];
     __weak CYFolder *weakFolder = folder;
     __weak typeof(self) weakSelf = self;
